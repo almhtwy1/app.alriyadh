@@ -40,7 +40,16 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                 let subject = rowData.length > 1 ? rowData[1] : '';
                 let date = rowData.length > 3 ? rowData[3] : '';
-                let duration = calculateDuration(date); // حساب المدة باستخدام التاريخ
+                
+                // استخدام التاريخ لحساب المدة إذا كانت دالة calculateDuration موجودة
+                let duration = "غير متوفر";
+                try {
+                    if (typeof calculateDuration === 'function') {
+                        duration = calculateDuration(date);
+                    }
+                } catch (e) {
+                    console.error('خطأ في حساب المدة:', e);
+                }
                 
                 tableRows += `
                     <tr>
@@ -73,7 +82,16 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                     let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                     let subject = rowData.length > 1 ? rowData[1] : '';
                     let date = rowData.length > 3 ? rowData[3] : '';
-                    let duration = calculateDuration(date); // حساب المدة باستخدام التاريخ
+                    
+                    // استخدام التاريخ لحساب المدة إذا كانت دالة calculateDuration موجودة
+                    let duration = "غير متوفر";
+                    try {
+                        if (typeof calculateDuration === 'function') {
+                            duration = calculateDuration(date);
+                        }
+                    } catch (e) {
+                        console.error('خطأ في حساب المدة:', e);
+                    }
                     
                     tableRows += `
                         <tr>
