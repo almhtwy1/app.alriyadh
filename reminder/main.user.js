@@ -2,8 +2,7 @@
 // @name         أداة التذكير للمعاملات (متعددة الصفوف)
 // @namespace    http://tampermonkey.net/
 // @version      1.9
-// @description  إضافة زر تذكير لحفظ بيانات الصفوف المحددة والتذكير بها بعد وقت يتم تحديده بالدقائق من قبل المستخدم، مع إمكانية تأجيل التذكير بناءً على الرقم المدخل في مربع بجانب زر التأجيل وعدم حذف التذكير إلا عند اتخاذ إجراء من المستخدم. يتيح النقر المزدوج على الصف لفتح المعاملة دون تعطيل، مع إضافة عمود حذف لكل صف في نافذة التذكير يظهر كـ "×" بدون خلفية دائرية.
-// @author       You
+// @description  أداة تذكير تحفظ الصفوف المختارة وتذكّرك بها بعد وقت محدد
 // @match        http://rasel/CTS/CTSC*
 // @run-at       document-idle
 // @grant        GM_setValue
@@ -22,7 +21,11 @@
 (function() {
     'use strict';
 
-    // تهيئة المكونات
+    // تعريفات للمحرر فقط لتجنب التحذيرات
+    let addReminderButton, setupRowSelection, setupObserver, checkForReminders;
+    let addGlobalStyles, updateReminderBadge, findButtonById;
+
+    // التهيئة
     addReminderButton();
     setupRowSelection();
     setupObserver();
@@ -40,6 +43,7 @@
         const now = Date.now();
         if (now - lastCheck < 2000) return;
         lastCheck = now;
+
         addGlobalStyles();
         if (!findButtonById('6787')) {
             addReminderButton();
