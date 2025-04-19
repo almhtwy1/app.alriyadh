@@ -10,7 +10,7 @@
 // @grant        GM_getValue
 // @grant        GM_deleteValue
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/core/Storage.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/features/ReminderManager.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/features/ReminderManager-Updated.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderButton.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DurationUtils.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderPopup-Updated.js
