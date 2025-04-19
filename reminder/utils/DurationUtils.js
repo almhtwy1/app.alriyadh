@@ -1,4 +1,4 @@
-// دوال مساعدة لتحويل التاريخ ومحولة من السكريبت الأول (متتبع المعاملات الشامل)
+// دوال حساب المدة المضمنة في السكريبت الرئيسي
 
 // تحويل التاريخ الميلادي إلى هجري (معادلة تقريبية موثقة)
 function gregorianToHijri(gy, gm, gd) {
@@ -69,19 +69,4 @@ function calculateDuration(hijriDateStr) {
     if (diff === 0) return 'اليوم';
     if (diff === 1) return 'أمس';
     return diff > 0 ? diff + ' يوم' : 'تاريخ مستقبلي';
-}
-
-// دالة استخراج التاريخ الهجري من نص
-function extractHijriDate(dateText) {
-    // تنظيف وتحويل التاريخ
-    let cleanDate = convertToEnglishNumbers(dateText);
-    
-    // استخراج أرقام التاريخ باستخدام تعبير منتظم
-    let dateMatch = cleanDate.match(/(\d{1,4})[\/-](\d{1,2})[\/-](\d{1,2})/);
-    
-    if (dateMatch) {
-        return `${dateMatch[1]}/${dateMatch[2]}/${dateMatch[3]}`;
-    }
-    
-    return null;
 }
