@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         أداة التذكير للمعاملات (متعددة الصفوف)
+// @name         أداة التذكير للمعاملات (متعددة الصفوف) مع حساب المدة
 // @namespace    http://tampermonkey.net/
-// @version      1.9
-// @description  إضافة زر تذكير لحفظ بيانات الصفوف المحددة والتذكير بها بعد وقت يتم تحديده بالدقائق من قبل المستخدم، مع إمكانية تأجيل التذكير بناءً على الرقم المدخل في مربع بجانب زر التأجيل وعدم حذف التذكير إلا عند اتخاذ إجراء من المستخدم. يتيح النقر المزدوج على الصف لفتح المعاملة دون تعطيل، مع إضافة عمود حذف لكل صف في نافذة التذكير يظهر كـ "×" بدون خلفية دائرية.
+// @version      2.0
+// @description  إضافة زر تذكير لحفظ بيانات الصفوف المحددة والتذكير بها بعد وقت محدد مع إظهار المدة وحسابها من التاريخ الهجري، وإمكانية تأجيل التذكير وعدم حذفه إلا بإجراء من المستخدم.
 // @author       You
 // @match        http://rasel/CTS/CTSC*
 // @run-at       document-idle
@@ -12,7 +12,8 @@
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/core/Storage.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/features/ReminderManager.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderButton.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderPopup.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DurationUtils.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderPopup-Updated.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/observers/MutationHandler.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/plugins/ReminderSound.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DOMUtils.js
