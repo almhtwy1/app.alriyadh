@@ -40,17 +40,6 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                 let subject = rowData.length > 1 ? rowData[1] : '';
                 let date = rowData.length > 3 ? rowData[3] : '';
-                
-                // استخدام التاريخ لحساب المدة إذا كانت دالة calculateDuration موجودة
-                let duration = "غير متوفر";
-                try {
-                    if (typeof calculateDuration === 'function') {
-                        duration = calculateDuration(date);
-                    }
-                } catch (e) {
-                    console.error('خطأ في حساب المدة:', e);
-                }
-                
                 tableRows += `
                     <tr>
                         <td>
@@ -60,7 +49,6 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                         <td>${transactionNumber}</td>
                         <td>${subject}</td>
                         <td>${formatDate(date)}</td>
-                        <td>${duration}</td>
                     </tr>
                 `;
             });
@@ -74,7 +62,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
 
                 tableRows += `
                     <tr class="reminder-group-header">
-                        <td colspan="6">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>
+                        <td colspan="5">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>
                     </tr>
                 `;
 
@@ -82,17 +70,6 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                     let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                     let subject = rowData.length > 1 ? rowData[1] : '';
                     let date = rowData.length > 3 ? rowData[3] : '';
-                    
-                    // استخدام التاريخ لحساب المدة إذا كانت دالة calculateDuration موجودة
-                    let duration = "غير متوفر";
-                    try {
-                        if (typeof calculateDuration === 'function') {
-                            duration = calculateDuration(date);
-                        }
-                    } catch (e) {
-                        console.error('خطأ في حساب المدة:', e);
-                    }
-                    
                     tableRows += `
                         <tr>
                             <td>
@@ -102,7 +79,6 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <td>${transactionNumber}</td>
                             <td>${subject}</td>
                             <td>${formatDate(date)}</td>
-                            <td>${duration}</td>
                         </tr>
                     `;
                 });
@@ -125,7 +101,6 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                                 <th>رقم المعاملة</th>
                                 <th>الموضوع</th>
                                 <th>تاريخ الإحالة</th>
-                                <th>المدة</th>
                             </tr>
                         </thead>
                         <tbody>
