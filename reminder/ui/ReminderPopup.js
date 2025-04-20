@@ -40,6 +40,10 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                 let subject = rowData.length > 1 ? rowData[1] : '';
                 let date = rowData.length > 3 ? rowData[3] : '';
+                
+                // هنا نقوم بتحويل التاريخ الهجري إلى ميلادي
+                const formattedDate = formatHijriWithGregorian(date);
+                
                 tableRows += `
                     <tr>
                         <td>
@@ -48,7 +52,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                         <td>${index + 1}</td>
                         <td>${transactionNumber}</td>
                         <td>${subject}</td>
-                        <td>${formatDate(date)}</td>
+                        <td>${formattedDate}</td>
                     </tr>
                 `;
             });
@@ -70,6 +74,10 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                     let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                     let subject = rowData.length > 1 ? rowData[1] : '';
                     let date = rowData.length > 3 ? rowData[3] : '';
+                    
+                    // هنا نقوم بتحويل التاريخ الهجري إلى ميلادي
+                    const formattedDate = formatHijriWithGregorian(date);
+                    
                     tableRows += `
                         <tr>
                             <td>
@@ -78,7 +86,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <td>${index + 1}</td>
                             <td>${transactionNumber}</td>
                             <td>${subject}</td>
-                            <td>${formatDate(date)}</td>
+                            <td>${formattedDate}</td>
                         </tr>
                     `;
                 });
@@ -98,9 +106,9 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <tr>
                                 <th>حذف</th>
                                 <th>#</th>
-                                <th>المعاملة</th>
+                                <th>رقم المعاملة</th>
                                 <th>الموضوع</th>
-                                <th>الإحالة</th>
+                                <th>تاريخ الإحالة</th>
                             </tr>
                         </thead>
                         <tbody>
