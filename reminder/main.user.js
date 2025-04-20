@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         أداة التذكير للمعاملات (متعددة الصفوف)
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.0
 // @description  إضافة زر تذكير لحفظ بيانات الصفوف المحددة والتذكير بها بعد وقت يتم تحديده بالدقائق من قبل المستخدم، مع إمكانية تأجيل التذكير بناءً على الرقم المدخل في مربع بجانب زر التأجيل وعدم حذف التذكير إلا عند اتخاذ إجراء من المستخدم. يتيح النقر المزدوج على الصف لفتح المعاملة دون تعطيل، مع إضافة عمود حذف لكل صف في نافذة التذكير يظهر كـ "×" بدون خلفية دائرية.
 // @author       You
 // @match        http://rasel/CTS/CTSC*
@@ -41,24 +41,6 @@
     
     // الاستماع إلى تغييرات حالة النافذة لتوفير الموارد
     document.addEventListener('visibilitychange', onVisibilityChange);
-
-    // مراقبة النقر على الألسنة مباشرة
-    document.addEventListener('click', (e) => {
-        // تحقق مما إذا كان النقر على لسان
-        const clickedTab = e.target.closest('.chrometabs li, .tab-container li');
-        if (clickedTab) {
-            console.log('تم النقر على لسان:', clickedTab.id || clickedTab.textContent);
-            
-            // تأخير قصير لضمان تحديث DOM
-            setTimeout(() => {
-                console.log('التحقق من وجود زر التذكير بعد النقر على اللسان');
-                if (!findButtonById('6787')) {
-                    addReminderButton();
-                }
-                updateReminderBadge();
-            }, 500);
-        }
-    });
 
     // تهيئة المكونات الأساسية
     addReminderButton();
@@ -119,39 +101,4 @@
     } else {
         window.addEventListener('load', checkComponentsExistence);
     }
-    
-    // مراقبة تغييرات DOM الخاصة بالألسنة
-    const tabsObserverSetup = () => {
-        const tabsContainer = document.querySelector('.chrometabs') || 
-                             document.querySelector('.tab-container ul') ||
-                             document.querySelector('#home_RightPanel_Menu');
-        
-        if (tabsContainer) {
-            console.log('تم إيجاد حاوية الألسنة، إعداد مراقب خاص');
-            
-            const tabsObserver = new MutationObserver((mutations) => {
-                console.log('تم رصد تغييرات في الألسنة');
-                // تأخير قصير لضمان اكتمال التغييرات
-                setTimeout(() => {
-                    if (!findButtonById('6787')) {
-                        console.log('زر التذكير غير موجود، جاري إضافته');
-                        addReminderButton();
-                    }
-                }, 300);
-            });
-            
-            tabsObserver.observe(tabsContainer, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['class']
-            });
-        } else {
-            // إذا لم يتم إيجاد حاوية الألسنة، حاول مرة أخرى بعد فترة
-            setTimeout(tabsObserverSetup, 1000);
-        }
-    };
-    
-    // بدء مراقبة الألسنة
-    tabsObserverSetup();
 })();
