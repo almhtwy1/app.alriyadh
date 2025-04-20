@@ -41,8 +41,10 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 let subject = rowData.length > 1 ? rowData[1] : '';
                 let date = rowData.length > 3 ? rowData[3] : '';
                 
-                // هنا نقوم بتحويل التاريخ الهجري إلى ميلادي
-                const formattedDate = formatHijriWithGregorian(date);
+                // تحويل التاريخ الهجري إلى ميلادي
+                if (isHijriDate(date)) {
+                    date = formatHijriAsGregorian(date);
+                }
                 
                 tableRows += `
                     <tr>
@@ -52,7 +54,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                         <td>${index + 1}</td>
                         <td>${transactionNumber}</td>
                         <td>${subject}</td>
-                        <td>${formattedDate}</td>
+                        <td>${date}</td>
                     </tr>
                 `;
             });
@@ -75,8 +77,10 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                     let subject = rowData.length > 1 ? rowData[1] : '';
                     let date = rowData.length > 3 ? rowData[3] : '';
                     
-                    // هنا نقوم بتحويل التاريخ الهجري إلى ميلادي
-                    const formattedDate = formatHijriWithGregorian(date);
+                    // تحويل التاريخ الهجري إلى ميلادي
+                    if (isHijriDate(date)) {
+                        date = formatHijriAsGregorian(date);
+                    }
                     
                     tableRows += `
                         <tr>
@@ -86,7 +90,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <td>${index + 1}</td>
                             <td>${transactionNumber}</td>
                             <td>${subject}</td>
-                            <td>${formattedDate}</td>
+                            <td>${date}</td>
                         </tr>
                     `;
                 });
