@@ -12,13 +12,6 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
         let remindersToShow = showAll ? reminderList : reminderList.filter(r => now >= r.showAt);
         if (remindersToShow.length === 0) return;
 
-        // تشغيل صوت التنبيه فور وجود تذكيرات للعرض
-        try {
-            playReminderSound();
-        } catch (e) {
-            console.error('خطأ في تشغيل صوت التذكير:', e);
-        }
-
         let popupContainer = document.getElementById('unifiedReminderPopup');
         if (popupContainer) {
             document.body.removeChild(popupContainer);
@@ -204,6 +197,13 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 updateReminderBadge();
                 document.body.removeChild(popupContainer);
             });
+        }
+
+        // تشغيل صوت التذكير عند العرض
+        try {
+            playReminderSound();
+        } catch (e) {
+            console.error('خطأ في تشغيل صوت التذكير:', e);
         }
     } catch (e) {
         console.error('خطأ في عرض التذكيرات:', e);
