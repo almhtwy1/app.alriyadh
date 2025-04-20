@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         أداة التذكير للمعاملات (متعددة الصفوف)
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.0
 // @description  إضافة زر تذكير لحفظ بيانات الصفوف المحددة والتذكير بها بعد وقت يتم تحديده بالدقائق من قبل المستخدم، مع إمكانية تأجيل التذكير بناءً على الرقم المدخل في مربع بجانب زر التأجيل وعدم حذف التذكير إلا عند اتخاذ إجراء من المستخدم. يتيح النقر المزدوج على الصف لفتح المعاملة دون تعطيل، مع إضافة عمود حذف لكل صف في نافذة التذكير يظهر كـ "×" بدون خلفية دائرية.
 // @author       You
 // @match        http://rasel/CTS/CTSC*
@@ -22,7 +22,27 @@
 (function() {
     'use strict';
 
-    // تهيئة المكونات
+    // عند الدخول للنافذة
+    const onVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+            console.log('التبديل إلى نافذة نشطة - تحديث مكونات التذكير');
+            
+            // التأكد من وجود الزر
+            if (!findButtonById('6787')) {
+                addReminderButton();
+            }
+            
+            // التحقق من التذكيرات وتحديث الشارة
+            checkForReminders();
+            updateReminderBadge();
+            setupRowSelection();
+        }
+    };
+    
+    // الاستماع إلى تغييرات حالة النافذة لتوفير الموارد
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    // تهيئة المكونات الأساسية
     addReminderButton();
     setupRowSelection();
     setupObserver();
@@ -31,20 +51,54 @@
     // إضافة الأنماط العامة
     addGlobalStyles();
 
-    // تحديث شارة التذكير بشكل دوري
-    setInterval(updateReminderBadge, 3000);
+    // تحديث شارة التذكير بشكل دوري - وقت أطول لتوفير الأداء
+    const reminderBadgeInterval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            updateReminderBadge();
+        }
+    }, 5000); // زيادة من 3000 إلى 5000 مللي ثانية
 
-    // التحقق من التذكيرات بشكل دوري
+    // التحقق من التذكيرات والمكونات بشكل دوري مع تحسين الأداء
     let lastCheck = Date.now();
-    setInterval(() => {
-        const now = Date.now();
-        if (now - lastCheck < 2000) return;
-        lastCheck = now;
-        addGlobalStyles();
+    const componentCheckInterval = setInterval(() => {
+        // التحقق فقط إذا كانت النافذة مرئية ونشطة
+        if (document.visibilityState === 'visible') {
+            const now = Date.now();
+            if (now - lastCheck < 3000) return;
+            lastCheck = now;
+            
+            // فحص فقط إذا كانت هناك حاجة
+            if (!findButtonById('6787')) {
+                addReminderButton();
+            }
+
+            // تحديث الشارة والأنماط
+            updateReminderBadge();
+            addGlobalStyles();
+        }
+    }, 3000); // زيادة من 2000 إلى 3000 مللي ثانية
+    
+    // تنظيف الفواصل الزمنية عند مغادرة الصفحة
+    window.addEventListener('beforeunload', () => {
+        clearInterval(reminderBadgeInterval);
+        clearInterval(componentCheckInterval);
+    });
+    
+    // وظيفة للتحقق من وجود تحديثات للمكونات
+    function checkComponentsExistence() {
+        if (!document.getElementById('reminder-global-styles')) {
+            addGlobalStyles();
+        }
+        
         if (!findButtonById('6787')) {
             addReminderButton();
         }
-        setupRowSelection();
-        updateReminderBadge();
-    }, 2000);
+    }
+    
+    // التحقق من المكونات بعد تحميل الصفحة
+    if (document.readyState === 'complete') {
+        checkComponentsExistence();
+    } else {
+        window.addEventListener('load', checkComponentsExistence);
+    }
 })();
