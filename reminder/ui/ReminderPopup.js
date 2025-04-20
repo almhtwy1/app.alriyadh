@@ -98,9 +98,9 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <tr>
                                 <th>حذف</th>
                                 <th>#</th>
-                                <th>رقم المعاملة</th>
+                                <th>المعاملة</th>
                                 <th>الموضوع</th>
-                                <th>تاريخ الإحالة</th>
+                                <th>الإحالة</th>
                             </tr>
                         </thead>
                         <tbody>
