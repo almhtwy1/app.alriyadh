@@ -199,7 +199,12 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
             });
         }
 
-        makePopupDraggable(popupContainer);
+        // تشغيل صوت التذكير عند العرض
+        try {
+            playReminderSound();
+        } catch (e) {
+            console.error('خطأ في تشغيل صوت التذكير:', e);
+        }
     } catch (e) {
         console.error('خطأ في عرض التذكيرات:', e);
     }
@@ -235,7 +240,6 @@ function addPopupStyles() {
             position: relative;
             padding: 15px 20px;
             border-bottom: 1px solid #e0e0e0;
-            cursor: move;
             background: #fafafa;
         }
         .popup-header h2 {
@@ -357,32 +361,4 @@ function addPopupStyles() {
         }
     `;
     document.head.appendChild(styleElement);
-}
-
-function makePopupDraggable(popupElement) {
-    const headerElement = popupElement.querySelector('.popup-header');
-    if (!headerElement) return;
-    let isDragging = false;
-    let offsetX, offsetY;
-    headerElement.addEventListener('mousedown', function(e) {
-        if (e.target.classList.contains('close-popup-btn')) return;
-        isDragging = true;
-        offsetX = e.clientX - popupElement.getBoundingClientRect().left;
-        offsetY = e.clientY - popupElement.getBoundingClientRect().top;
-        document.body.style.userSelect = 'none';
-    });
-    document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        const newLeft = e.clientX - offsetX;
-        const newTop = e.clientY - offsetY;
-        const maxLeft = window.innerWidth - popupElement.offsetWidth;
-        const maxTop = window.innerHeight - popupElement.offsetHeight;
-        popupElement.style.left = Math.min(Math.max(0, newLeft), maxLeft) + 'px';
-        popupElement.style.top = Math.min(Math.max(0, newTop), maxTop) + 'px';
-        popupElement.style.transform = 'none';
-    });
-    document.addEventListener('mouseup', function() {
-        isDragging = false;
-        document.body.style.userSelect = '';
-    });
 }
