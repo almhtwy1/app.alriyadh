@@ -67,19 +67,8 @@ function checkForReminders() {
     try {
         const now = Date.now();
         const reminderList = getActiveRemindersList();
-        let soundPlayed = false;
-        
         for (const reminder of reminderList) {
             if (now >= reminder.showAt) {
-                if (!soundPlayed) {
-                    // تشغيل الصوت مرة واحدة فقط حتى لو كان هناك عدة تذكيرات
-                    try {
-                        playReminderSound();
-                        soundPlayed = true;
-                    } catch (e) {
-                        console.error('خطأ في تشغيل صوت التذكير:', e);
-                    }
-                }
                 showUnifiedReminderPopup();
             } else {
                 const timeRemaining = reminder.showAt - now;
