@@ -1,172 +1,95 @@
 /**
- * جدول تقريبي للتحويل من هجري إلى ميلادي
- * لسنوات محددة مع إمكانية الإضافة
- */
-const HIJRI_GREGORIAN_MAP = {
-    1440: 2019,
-    1441: 2020,
-    1442: 2021,
-    1443: 2022,
-    1444: 2023,
-    1445: 2024,
-    1446: 2025,
-    1447: 2026,
-    1448: 2027,
-    1449: 2028,
-    1450: 2029
-};
-
-/**
- * تحويل التاريخ الهجري إلى ميلادي باستخدام طريقة مباشرة
+ * تنسيق التاريخ إلى صيغة معينة
+ * تحويل التاريخ من أي صيغة محتملة إلى الصيغة المطلوبة
  * 
- * @param {string} dateStr - التاريخ كنص (قد يكون هجري أو ميلادي)
- * @returns {string} - التاريخ الميلادي أو النص الأصلي إذا كان غير هجري
+ * @param {string} dateStr - التاريخ كنص
+ * @returns {string} - التاريخ المنسق
  */
 function formatDate(dateStr) {
     if (!dateStr || typeof dateStr !== 'string') return '';
     
-    // تنظيف النص من المسافات الزائدة
-    dateStr = dateStr.trim();
-    
-    // التحقق من نمط التاريخ الهجري: YYYY-MM-DD أو YYYY/MM/DD
-    const hijriRegex = /^(14\d{2}|1[5-9]\d{2})[\-\/](\d{1,2})[\-\/](\d{1,2})$/;
-    const match = dateStr.match(hijriRegex);
-    
-    if (match) {
-        // التاريخ هجري، نقوم بالتحويل
-        const hijriYear = parseInt(match[1], 10);
-        const month = parseInt(match[2], 10);
-        const day = parseInt(match[3], 10);
-        
-        // تحويل من هجري إلى ميلادي
-        try {
-            // استخدام الجدول إذا كانت السنة موجودة فيه
-            if (HIJRI_GREGORIAN_MAP[hijriYear]) {
-                const gregorianYear = HIJRI_GREGORIAN_MAP[hijriYear];
-                
-                // تعديل بسيط للشهر (شهور الهجري والميلادي غير متطابقة)
-                // هذا تقريب بسيط، يمكن تحسينه مستقبلاً
-                let gregorianMonth = month;
-                let gregorianDay = day;
-                
-                // تعديل الشهر واليوم بناءً على مقاربة تقريبية
-                // للتحويل من هجري إلى ميلادي
-                gregorianMonth = ((month + 2) % 12);
-                if (gregorianMonth === 0) gregorianMonth = 12;
-                
-                // معالجة تغيير السنة عند انتقال الشهر
-                let yearAdjustment = 0;
-                if (month >= 11) yearAdjustment = 1;
-                
-                // تنسيق التاريخ الميلادي
-                return `${gregorianYear + yearAdjustment}-${gregorianMonth.toString().padStart(2, '0')}-${gregorianDay.toString().padStart(2, '0')}`;
-            } else {
-                // طريقة تقريبية إذا لم تكن السنة موجودة في الجدول
-                const gregorianYear = Math.floor(hijriYear * 0.97 + 622);
-                return `${gregorianYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            }
-        } catch (e) {
-            console.error('خطأ في تحويل التاريخ الهجري:', e);
-            return dateStr; // إرجاع التاريخ الأصلي في حالة الخطأ
-        }
-    }
-    
-    // إذا لم يكن هجرياً، نتعامل معه كتاريخ عادي
+    // محاولة استخراج تاريخ من النص بدون تنسيق محدد
     try {
+        // محاولة التعرف على صيغ مختلفة للتاريخ واليوم والشهر والسنة
         if (dateStr.includes('-')) {
+            // التاريخ بصيغة yyyy-mm-dd أو dd-mm-yyyy
             const parts = dateStr.split('-');
+            
+            // التحقق من الصيغة
             if (parts.length === 3) {
-                return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                // تحديد ما إذا كان بصيغة yyyy-mm-dd أو dd-mm-yyyy
+                if (parts[0].length === 4) {
+                    // yyyy-mm-dd
+                    return `${parts[0]}-${parts[1]}-${parts[2]}`;
+                } else if (parts[2].length === 4) {
+                    // dd-mm-yyyy
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
             }
+            
+            // إذا لم يتم التعرف على الصيغة، نعيد بدون تغيير
+            return dateStr;
         } else if (dateStr.includes('/')) {
+            // التاريخ بصيغة mm/dd/yyyy أو dd/mm/yyyy
             const parts = dateStr.split('/');
+            
             if (parts.length === 3) {
-                return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                // تحويل إلى صيغة yyyy-mm-dd
+                if (parts[2].length === 4) {
+                    // dd/mm/yyyy أو mm/dd/yyyy
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+            
+            return dateStr;
+        } else if (/\d{8}/.test(dateStr)) {
+            // التاريخ بصيغة yyyymmdd
+            return `${dateStr.substr(0,4)}-${dateStr.substr(4,2)}-${dateStr.substr(6,2)}`;
+        } else {
+            // تحويل التاريخ العادي باستخدام API التاريخ
+            const date = new Date(dateStr);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString().split('T')[0]; // yyyy-mm-dd
             }
         }
     } catch (e) {
         console.error('خطأ في تنسيق التاريخ:', e);
     }
     
-    // إرجاع التاريخ الأصلي إذا لم يتم التعرف عليه
+    // إذا لم يتم التعرف على أي صيغة، نعيد بدون تغيير
     return dateStr;
 }
 
 /**
- * عرض التاريخ بصيغة مقروءة (مثل: 20 أبريل 2025)
- * 
- * @param {string} dateStr - التاريخ كنص
- * @returns {string} - التاريخ بصيغة مقروءة
+ * تحويل التاريخ إلى صيغة مقروءة
+ * @param {string} dateStr - التاريخ كنص بالصيغة yyyy-mm-dd
+ * @returns {string} - التاريخ المقروء
  */
 function formatDateForDisplay(dateStr) {
     if (!dateStr) return '';
     
     try {
-        // تحويل التاريخ أولاً باستخدام formatDate
+        // تنسيق التاريخ أولاً
         const formattedDate = formatDate(dateStr);
         
-        // محاولة فصل التاريخ إلى أجزاء
-        const parts = formattedDate.split(/[\-\/]/);
-        if (parts.length !== 3) return formattedDate;
-        
-        // تحديد ما إذا كان التاريخ بتنسيق سنة-شهر-يوم أو يوم-شهر-سنة
-        let year, month, day;
-        
-        if (parts[0].length === 4) {
-            // سنة-شهر-يوم
-            year = parts[0];
-            month = parseInt(parts[1], 10);
-            day = parseInt(parts[2], 10);
-        } else if (parts[2].length === 4) {
-            // يوم-شهر-سنة
-            day = parseInt(parts[0], 10);
-            month = parseInt(parts[1], 10);
-            year = parts[2];
-        } else {
-            // تنسيق غير معروف
-            return formattedDate;
+        // التحقق من أن التاريخ بالصيغة yyyy-mm-dd
+        if (formattedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const [year, month, day] = formattedDate.split('-');
+            
+            // تحويل الشهر إلى اسم
+            const monthNames = [
+                'يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو',
+                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+            ];
+            
+            const monthIndex = parseInt(month, 10) - 1;
+            return `${day} ${monthNames[monthIndex]} ${year}`;
         }
         
-        // تحويل الشهر إلى اسم
-        const monthNames = [
-            'يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو',
-            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-        ];
-        
-        const monthName = monthNames[month - 1] || '';
-        return `${day} ${monthName} ${year}`;
+        return formattedDate;
     } catch (e) {
         console.error('خطأ في تنسيق التاريخ للعرض:', e);
         return dateStr;
-    }
-}
-
-/**
- * تنسيق خاص للتاريخ الهجري ليظهر في واجهة المستخدم
- * يعرض التاريخ الهجري مع ما يقابله بالميلادي
- * 
- * @param {string} hijriDate - التاريخ الهجري
- * @returns {string} - التاريخ الهجري والميلادي معاً
- */
-function formatHijriWithGregorian(hijriDate) {
-    if (!hijriDate) return '';
-    
-    try {
-        const gregorianDate = formatDate(hijriDate);
-        // إذا كان التاريخ لم يتغير، فهو ليس هجرياً
-        if (gregorianDate === hijriDate) return hijriDate;
-        
-        // تنسيق التاريخ الميلادي
-        const formattedGregorian = formatDateForDisplay(gregorianDate);
-        
-        // إرجاع التاريخ الميلادي فقط
-        return formattedGregorian;
-        
-        // أو يمكن إرجاع الهجري والميلادي معاً 
-        // return `${hijriDate} (${formattedGregorian})`;
-    } catch (e) {
-        console.error('خطأ في تنسيق التاريخ الهجري مع الميلادي:', e);
-        return hijriDate;
     }
 }
 
