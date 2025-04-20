@@ -41,10 +41,7 @@ function playReminderSound(times = 3) {
         reminderAudio.currentTime = 0;
         
         // تشغيل الصوت
-        reminderAudio.play().catch(e => {
-            // معالجة خطأ عدم تفاعل المستخدم
-            console.warn('تعذر تشغيل الصوت تلقائياً. قد يتطلب تفاعل المستخدم أولاً.');
-        });
+        reminderAudio.play();
         
         // تكرار الصوت إذا طلب المستخدم أكثر من مرة
         let playCount = 1;
@@ -56,9 +53,7 @@ function playReminderSound(times = 3) {
             
             reminderAudio.pause();
             reminderAudio.currentTime = 0;
-            reminderAudio.play().catch(e => {
-                console.warn('تعذر تشغيل الصوت في التكرار.');
-            });
+            reminderAudio.play();
             playCount++;
         }, 1500);
     } catch (e) {
