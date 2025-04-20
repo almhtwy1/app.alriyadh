@@ -8,12 +8,12 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_addStyle
 // @compatible   chrome,firefox,edge
-// @require      https://raw.githubusercontent.com/almhtwy1/transaction-tracker/main/core/DateConverter.js
-// @require      https://raw.githubusercontent.com/almhtwy1/transaction-tracker/main/utils/StringUtils.js
-// @require      https://raw.githubusercontent.com/almhtwy1/transaction-tracker/main/ui/Interface.js
-// @require      https://raw.githubusercontent.com/almhtwy1/transaction-tracker/main/ui/Styles.js
-// @require      https://raw.githubusercontent.com/almhtwy1/transaction-tracker/main/features/DataHandler.js
-// @require      https://raw.githubusercontent.com/almhtwy1/transaction-tracker/main/services/TransactionService.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/refs/heads/main/transaction-tracker/core/DateConverter.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/refs/heads/main/transaction-tracker/utils/StringUtils.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/refs/heads/main/transaction-tracker/ui/Interface.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/refs/heads/main/transaction-tracker/ui/Styles.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/refs/heads/main/transaction-tracker/features/DataHandler.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/refs/heads/main/transaction-tracker/services/TransactionService.js
 // ==/UserScript==
 
 (function () {
