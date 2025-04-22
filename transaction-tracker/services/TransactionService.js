@@ -3,69 +3,53 @@
  */
 
 /**
- * كاش لتخزين السنة الهجرية المناسبة لكل معاملة تم العثور عليها
- * يساعد في تسريع عمليات البحث المتكررة
- */
-const transactionYearCache = {};
-
-/**
  * جلب بيانات المعاملة من الخادم
  * @param {string} num - رقم المعاملة
  * @returns {Promise<object>} - كائن يحتوي على بيانات الاستجابة
  */
 function fetchTransaction(num) {
-  // التحقق من وجود السنة في الكاش لتسريع البحث
-  if (transactionYearCache[num]) {
-    console.log(`استخدام السنة المخزنة للمعاملة ${num}: ${transactionYearCache[num]}`);
-    const url = createTransactionUrl(num, transactionYearCache[num]);
-    return sendRequest(url);
-  }
+  // استخراج السنة من رقم المعاملة
+  const year = detectYearFromNumber(num);
+  console.log(`تحديد السنة الهجرية ${year} للمعاملة ${num}`);
   
-  // استخدام السنة الأحدث أولاً ثم الانتقال للسنوات الأقدم - نحد من عدد السنوات للتسريع
-  return fetchWithYears(num, [1446, 1445, 1444, 1443]);
+  // استخدم السنة المحددة للبحث
+  const url = createTransactionUrl(num, year);
+  return sendRequest(url);
 }
 
 /**
- * محاولة جلب بيانات المعاملة باستخدام عدة سنوات هجرية
+ * تحديد السنة الهجرية من رقم المعاملة
  * @param {string} num - رقم المعاملة
- * @param {Array<number>} years - مصفوفة السنوات الهجرية المراد تجربتها
- * @returns {Promise<object>} - كائن يحتوي على بيانات الاستجابة
+ * @returns {number} - السنة الهجرية المحددة
  */
-async function fetchWithYears(num, years) {
-  // محاولة إرسال طلبات متوازية للسنوات المختلفة للتسريع
-  const requests = years.map(year => {
-    return new Promise(async (resolve) => {
-      try {
-        const url = createTransactionUrl(num, year);
-        const response = await sendRequest(url);
-        
-        // التحقق من وجود بيانات في الاستجابة
-        if (response.responseText && 
-            (response.responseText.includes("محالة إلى") || 
-             response.responseText.includes("div style=\"border: 1px solid #000000"))) {
-          // تخزين السنة الصحيحة في الكاش للاستخدام المستقبلي
-          transactionYearCache[num] = year;
-          console.log(`تم العثور على بيانات المعاملة ${num} في السنة الهجرية ${year}`);
-          resolve({ found: true, response, year });
-        } else {
-          resolve({ found: false, response, year });
-        }
-      } catch (error) {
-        resolve({ found: false, error, year });
-      }
-    });
-  });
+function detectYearFromNumber(num) {
+  // تنظيف رقم المعاملة للتأكد من أنه رقم فقط
+  const cleanNum = String(num).replace(/\D/g, '');
   
-  // انتظار أول استجابة ناجحة
-  const results = await Promise.all(requests);
-  const successResult = results.find(r => r.found);
-  
-  if (successResult) {
-    return successResult.response;
+  // استخراج أول رقمين من المعاملة (إذا وجد)
+  if (cleanNum.length >= 2) {
+    const prefix = cleanNum.substring(0, 2);
+    
+    // تحديد السنة بناءً على البادئة
+    if (prefix === "46" || prefix === "47") return 1446;
+    if (prefix === "45") return 1445;
+    if (prefix === "44") return 1444;
+    if (prefix === "43") return 1443;
+    if (prefix === "42") return 1442;
+    if (prefix === "41") return 1441;
+    if (prefix === "40") return 1440;
+    if (prefix === "39") return 1439;
+    if (prefix === "38") return 1438;
+    if (prefix === "37") return 1437;
+    if (prefix === "36") return 1436;
+    if (prefix === "35") return 1435;
+    
+    // للأرقام الأخرى التي قد تكون أقدم
+    if (parseInt(prefix) < 35) return 1434;
   }
   
-  // إذا لم يتم العثور على أي نتائج، استخدم أول استجابة
-  return results[0].response || { responseText: "" };
+  // إذا لم يتم تحديد السنة، استخدم السنة الحالية كافتراضية
+  return 1446;
 }
 
 /**
@@ -92,7 +76,7 @@ function sendRequest(url) {
     GM_xmlhttpRequest({
       method: "GET",
       url,
-      timeout: 5000, // إضافة مهلة زمنية لتسريع الفشل
+      timeout: 10000, // مهلة زمنية أطول قليلاً (10 ثوانٍ)
       onload: resp => {
         if (resp.status >= 200 && resp.status < 300) {
           resolve({ responseText: resp.responseText });
@@ -112,8 +96,8 @@ function sendRequest(url) {
  * @returns {string} - رابط ملف PDF للمعاملة
  */
 function createPdfLink(num) {
-  // استخدام السنة المخزنة في الكاش للوصول إلى ملف PDF الصحيح
-  const year = transactionYearCache[num] || 1446;
+  // تحديد السنة من رقم المعاملة للحصول على PDF
+  const year = detectYearFromNumber(num);
   
   return `http://rasel/CTS/CTSC?C=showreport&UseFM=yes&output=pdf&SignatureInfo=false&UserInfo=false&ImagePath=false&code=VisualTrackingCorrReport` +
         `&paramNames=P_link,transferIds,folderIds,referenceNumber,folderYear,username,depName,fullName,currentHijriDate` +
