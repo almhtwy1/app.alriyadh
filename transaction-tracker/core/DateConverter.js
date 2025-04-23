@@ -37,30 +37,45 @@ function calculateHijriDuration(dateStr) {
   
   let parts = dateStr.split('/');
   if (parts.length >= 3) {
-    let hYear = parseInt(parts[0], 10);
-    let hMonth = parseInt(parts[1], 10);
-    let hDay = parseInt(parts[2], 10);
-    
-    // الحصول على التاريخ الميلادي الحالي ثم تحويله إلى هجري
-    let today = new Date();
-    let currentHijri = gregorianToHijri(today.getFullYear(), today.getMonth(), today.getDate());
-    
-    // تحويل التاريخين إلى أرقام أيام مطلقة
-    let transactionDays = hijriToAbsolute(hYear, hMonth, hDay);
-    let currentDays = hijriToAbsolute(currentHijri.year, currentHijri.month, currentHijri.day);
-    
-    // حساب الفرق بين التاريخين
-    // نستخدم الآن: التاريخ الحالي - تاريخ المعاملة
-    let diff = currentDays - transactionDays;
-    
-    // قيمة موجبة تعني أن المعاملة أقدم من اليوم، قيمة سالبة تعني أنها في المستقبل
-    // هنا نلتزم بالقواعد المطلوبة:
-    // 0 = نفس اليوم (الفرق = 0)
-    // 1 = مضى يوم واحد (الفرق = 1)
-    // 2 = مضى يومان (الفرق = 2)
-    // وهكذا...
-    
-    return diff >= 0 ? diff : 0; // لا نسمح بقيم سالبة (المستقبل يعتبر اليوم)
+    try {
+      let hYear = parseInt(parts[0], 10);
+      let hMonth = parseInt(parts[1], 10);
+      let hDay = parseInt(parts[2], 10);
+      
+      // للتأكد من أن القيم رقمية صحيحة
+      if (isNaN(hYear) || isNaN(hMonth) || isNaN(hDay)) {
+        console.log("خطأ في تنسيق التاريخ:", dateStr);
+        return "غير متوفر";
+      }
+      
+      // هذا الجزء للتشخيص فقط - نطبع قيم التاريخ المستخرجة
+      console.log(`تاريخ المعاملة المستخرج: ${hYear}/${hMonth}/${hDay}`);
+      
+      // الحصول على التاريخ الميلادي الحالي ثم تحويله إلى هجري
+      let today = new Date();
+      let currentHijri = gregorianToHijri(today.getFullYear(), today.getMonth(), today.getDate());
+      
+      // طباعة التاريخ الحالي للتشخيص
+      console.log(`التاريخ الهجري الحالي: ${currentHijri.year}/${currentHijri.month}/${currentHijri.day}`);
+      
+      // تحويل التاريخين إلى أرقام أيام مطلقة - هنا نستخدم الدالة مباشرة بدون مشاكل تحويل
+      let transactionDays = hijriToAbsolute(hYear, hMonth, hDay);
+      let currentDays = hijriToAbsolute(currentHijri.year, currentHijri.month, currentHijri.day);
+      
+      // طباعة قيم الأيام المطلقة للتشخيص
+      console.log(`أيام المعاملة المطلقة: ${transactionDays}`);
+      console.log(`أيام التاريخ الحالي المطلقة: ${currentDays}`);
+      
+      // حساب الفرق بالأيام
+      let diff = currentDays - transactionDays;
+      console.log(`فرق الأيام المحسوب: ${diff}`);
+      
+      // لا نسمح بقيم سالبة - إذا كان التاريخ في المستقبل، نعتبره اليوم (0)
+      return diff >= 0 ? diff : 0;
+    } catch (e) {
+      console.error("خطأ في حساب المدة:", e);
+      return "غير متوفر";
+    }
   }
   
   return "غير متوفر";
