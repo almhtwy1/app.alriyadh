@@ -28,13 +28,9 @@ function hijriToAbsolute(iy, im, id) {
 }
 
 /**
- * حساب المدة بين تاريخين هجريين
+ * حساب المدة بين تاريخين هجريين بشكل صحيح
  * @param {string} dateStr - التاريخ الهجري بصيغة YYYY/MM/DD
- * @returns {number|string} - المدة بالأيام حسب الطلب:
- *                           - 0 إذا كانت في نفس اليوم
- *                           - 1 إذا كانت اليوم (أمس القريب)
- *                           - 2 إذا كانت أمس
- *                           - أو عدد الأيام بالإضافة إلى 1
+ * @returns {number|string} - المدة بالأيام
  */
 function calculateHijriDuration(dateStr) {
   if (dateStr === "غير متوفر") return "غير متوفر";
@@ -45,22 +41,26 @@ function calculateHijriDuration(dateStr) {
     let hMonth = parseInt(parts[1], 10);
     let hDay = parseInt(parts[2], 10);
     
-    // تحويل التاريخ الهجري المستخرج إلى عدد أيام مطلق
-    let referralAbs = hijriToAbsolute(hYear, hMonth, hDay);
-    
     // الحصول على التاريخ الميلادي الحالي ثم تحويله إلى هجري
     let today = new Date();
     let currentHijri = gregorianToHijri(today.getFullYear(), today.getMonth(), today.getDate());
-    let currentAbs = hijriToAbsolute(currentHijri.year, currentHijri.month, currentHijri.day);
     
-    // حساب الفرق بالأيام
-    let diff = currentAbs - referralAbs;
+    // تحويل التاريخين إلى أرقام أيام مطلقة
+    let transactionDays = hijriToAbsolute(hYear, hMonth, hDay);
+    let currentDays = hijriToAbsolute(currentHijri.year, currentHijri.month, currentHijri.day);
     
-    // تعديل المدة حسب الطلب
-    if (diff === 0) return 0;      // نفس اليوم: 0
-    if (diff === 1) return 1;      // اليوم (أمس القريب): 1
-    if (diff === 2) return 2;      // أمس: 2
-    return diff;                   // أي فرق آخر: عدد الأيام
+    // حساب الفرق بين التاريخين
+    // نستخدم الآن: التاريخ الحالي - تاريخ المعاملة
+    let diff = currentDays - transactionDays;
+    
+    // قيمة موجبة تعني أن المعاملة أقدم من اليوم، قيمة سالبة تعني أنها في المستقبل
+    // هنا نلتزم بالقواعد المطلوبة:
+    // 0 = نفس اليوم (الفرق = 0)
+    // 1 = مضى يوم واحد (الفرق = 1)
+    // 2 = مضى يومان (الفرق = 2)
+    // وهكذا...
+    
+    return diff >= 0 ? diff : 0; // لا نسمح بقيم سالبة (المستقبل يعتبر اليوم)
   }
   
   return "غير متوفر";
