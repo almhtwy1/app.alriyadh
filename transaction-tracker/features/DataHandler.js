@@ -105,7 +105,7 @@ const dataHandler = {
                 </div>
                 <div class="transaction-detail">
                   <span class="detail-label">المدة:</span>
-                  <span class="detail-value">${res.data.duration === 0 ? 'نفس اليوم' : (res.data.duration === 1 ? 'اليوم' : (res.data.duration === 2 ? 'أمس' : res.data.duration))}</span>
+                  <span class="detail-value">${res.data.duration}</span>
                 </div>
               </div>
             </div>`
