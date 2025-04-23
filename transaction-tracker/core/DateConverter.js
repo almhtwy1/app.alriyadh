@@ -30,7 +30,11 @@ function hijriToAbsolute(iy, im, id) {
 /**
  * حساب المدة بين تاريخين هجريين
  * @param {string} dateStr - التاريخ الهجري بصيغة YYYY/MM/DD
- * @returns {number|string} - المدة بالأيام أو كلمة "اليوم" أو "أمس" حسب المدة
+ * @returns {number|string} - المدة بالأيام حسب الطلب:
+ *                           - 0 إذا كانت في نفس اليوم
+ *                           - 1 إذا كانت اليوم (أمس القريب)
+ *                           - 2 إذا كانت أمس
+ *                           - أو عدد الأيام بالإضافة إلى 1
  */
 function calculateHijriDuration(dateStr) {
   if (dateStr === "غير متوفر") return "غير متوفر";
@@ -51,7 +55,12 @@ function calculateHijriDuration(dateStr) {
     
     // حساب الفرق بالأيام
     let diff = currentAbs - referralAbs;
-    return diff === 0 ? 'اليوم' : diff === 1 ? 'أمس' : diff;
+    
+    // تعديل المدة حسب الطلب
+    if (diff === 0) return 0;      // نفس اليوم: 0
+    if (diff === 1) return 1;      // اليوم (أمس القريب): 1
+    if (diff === 2) return 2;      // أمس: 2
+    return diff;                   // أي فرق آخر: عدد الأيام
   }
   
   return "غير متوفر";
