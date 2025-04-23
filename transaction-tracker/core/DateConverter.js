@@ -29,9 +29,7 @@ function hijriToAbsolute(iy, im, id) {
 
 /**
  * حساب المدة بين تاريخين هجريين بشكل صحيح
- * المشكلة الأساسية هي أن التاريخ الهجري المحسوب من التاريخ الميلادي 
- * لا يتطابق مع التاريخ الهجري الفعلي المستخدم في النظام
- * لذلك نستخدم التاريخ الهجري المخصص مباشرة
+ * تم إضافة تعديل لمعالجة فارق اليوم الواحد بين التاريخ الهجري المحسوب والفعلي
  * 
  * @param {string} dateStr - التاريخ الهجري بصيغة YYYY/MM/DD
  * @returns {number|string} - المدة بالأيام
@@ -52,15 +50,29 @@ function calculateHijriDuration(dateStr) {
         return "غير متوفر";
       }
       
-      // استخدام تاريخ اليوم الهجري الصحيح مباشرة بدلاً من حسابه
-      // نحن نعلم من الاختبار أن التاريخ الهجري الحالي هو 25/10/1446
-      let currentYear = 1446;
-      let currentMonth = 10;
-      let currentDay = 25;
+      // الحصول على التاريخ الميلادي الحالي ثم تحويله إلى هجري
+      let today = new Date();
+      let currentHijri = gregorianToHijri(today.getFullYear(), today.getMonth(), today.getDate());
+      
+      // إضافة يوم واحد للتاريخ الهجري المحسوب لتصحيح الفارق
+      // هذا سيعالج اختلاف اليوم بين التاريخ الهجري المحسوب والفعلي
+      let adjustedDay = currentHijri.day + 1;
+      let adjustedMonth = currentHijri.month;
+      let adjustedYear = currentHijri.year;
+      
+      // ضبط قيم الشهر والسنة إذا تجاوزت اليوم 30 (افتراضيًا للشهر الهجري)
+      if (adjustedDay > 30) {
+        adjustedDay = 1;
+        adjustedMonth++;
+        if (adjustedMonth > 12) {
+          adjustedMonth = 1;
+          adjustedYear++;
+        }
+      }
       
       // تحويل التاريخين إلى أيام مطلقة
       let transactionDays = hijriToAbsolute(hYear, hMonth, hDay);
-      let currentDays = hijriToAbsolute(currentYear, currentMonth, currentDay);
+      let currentDays = hijriToAbsolute(adjustedYear, adjustedMonth, adjustedDay);
       
       // حساب الفرق بالأيام
       let diff = currentDays - transactionDays;
