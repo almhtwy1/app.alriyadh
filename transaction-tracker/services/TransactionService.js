@@ -76,7 +76,7 @@ function sendRequest(url) {
     GM_xmlhttpRequest({
       method: "GET",
       url,
-      timeout: 10000, // مهلة زمنية أطول قليلاً (10 ثوانٍ)
+      timeout: 15000, // مهلة زمنية أطول قليلاً (10 ثوانٍ)
       onload: resp => {
         if (resp.status >= 200 && resp.status < 300) {
           resolve({ responseText: resp.responseText });
