@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      4.0
 // @description  تسجيل حضور بضغطة زر أو اختصار Alt+3، مع تعبئة البيانات والتنقل التلقائي حسب الشروط.
-// @author       محمد
+// @author       محمد بن مطلق القحطاني
 // @match        https://crm.alriyadh.gov.sa/*
 // @grant        none
 // ==/UserScript==
