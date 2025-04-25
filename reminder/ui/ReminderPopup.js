@@ -39,7 +39,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
             reminder.data.forEach((rowData, index) => {
                 let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                 let subject = rowData.length > 1 ? rowData[1] : '';
-                let toEmployee = rowData.length > 2 ? rowData[2] : '';  // إضافة قراءة بيانات الموظف
+                let toEmployee = rowData.length > 2 ? rowData[2] : '';  // بيانات الموظف
                 let date = rowData.length > 3 ? rowData[3] : '';
                 tableRows += `
                     <tr>
@@ -49,7 +49,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                         <td>${index + 1}</td>
                         <td>${transactionNumber}</td>
                         <td>${subject}</td>
-                        <td>${toEmployee}</td>  <!-- إضافة عمود الموظف -->
+                        <td>${toEmployee}</td>  <!-- عمود الموظف -->
                         <td>${formatDate(date)}</td>
                     </tr>
                 `;
@@ -64,14 +64,14 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
 
                 tableRows += `
                     <tr class="reminder-group-header">
-                        <td colspan="6">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>  <!-- تعديل colspan إلى 6 بدلاً من 5 -->
+                        <td colspan="6">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>  <!-- تعديل colspan إلى 6 -->
                     </tr>
                 `;
 
                 reminder.data.forEach((rowData, index) => {
                     let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                     let subject = rowData.length > 1 ? rowData[1] : '';
-                    let toEmployee = rowData.length > 2 ? rowData[2] : '';  // إضافة قراءة بيانات الموظف
+                    let toEmployee = rowData.length > 2 ? rowData[2] : '';  // بيانات الموظف
                     let date = rowData.length > 3 ? rowData[3] : '';
                     tableRows += `
                         <tr>
@@ -81,7 +81,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <td>${index + 1}</td>
                             <td>${transactionNumber}</td>
                             <td>${subject}</td>
-                            <td>${toEmployee}</td>  <!-- إضافة عمود الموظف -->
+                            <td>${toEmployee}</td>  <!-- عمود الموظف -->
                             <td>${formatDate(date)}</td>
                         </tr>
                     `;
@@ -104,7 +104,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                                 <th>#</th>
                                 <th>رقم المعاملة</th>
                                 <th>الموضوع</th>
-                                <th>إلى الموظف</th>  <!-- إضافة عنوان العمود الجديد -->
+                                <th>إلى الموظف</th>  <!-- عنوان عمود الموظف -->
                                 <th>تاريخ الإحالة</th>
                             </tr>
                         </thead>
@@ -204,9 +204,27 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
             });
         }
 
-        // تشغيل صوت التذكير عند العرض
+        // تشغيل صوت التذكير مع تحسينات التوافق مع المتصفحات
         try {
-            playReminderSound();
+            // تشغيل صوت التذكير مع التحقق من تفاعل المستخدم
+            if (typeof hasUserInteraction !== 'undefined' && typeof enableUserInteraction !== 'undefined') {
+                if (hasUserInteraction) {
+                    playReminderSound(3); // تشغيل الصوت 3 مرات
+                } else {
+                    // إذا لم يكن هناك تفاعل مستخدم، ننتظر قليلاً ثم نحاول مرة أخرى
+                    console.log('جاري انتظار تفاعل المستخدم قبل تشغيل الصوت...');
+                    setTimeout(() => {
+                        if (typeof hasUserInteraction !== 'undefined' && hasUserInteraction) {
+                            playReminderSound(3);
+                        } else {
+                            console.log('لم يتم تسجيل تفاعل مستخدم، لن يتم تشغيل الصوت');
+                        }
+                    }, 2000);
+                }
+            } else {
+                // استخدام الطريقة القديمة إذا لم تكن المتغيرات الجديدة متاحة
+                playReminderSound();
+            }
         } catch (e) {
             console.error('خطأ في تشغيل صوت التذكير:', e);
         }
