@@ -14,7 +14,6 @@
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderButton.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderPopup.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/observers/MutationHandler.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/plugins/ReminderSound.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DOMUtils.js
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DateFormatter.js
 // ==/UserScript==
@@ -36,11 +35,6 @@
             checkForReminders();
             updateReminderBadge();
             setupRowSelection();
-            
-            // تفعيل نظام الصوت عند العودة للنافذة
-            if (typeof enableUserInteraction === 'function') {
-                enableUserInteraction();
-            }
         }
     };
     
@@ -106,27 +100,4 @@
     } else {
         window.addEventListener('load', checkComponentsExistence);
     }
-    
-    // تهيئة وتفعيل نظام الصوت
-    function initSoundSystem() {
-        // محاولة تفعيل الصوت بعد تفاعل المستخدم
-        document.addEventListener('click', function activateSound() {
-            console.log('تم تسجيل نقرة مستخدم، جاري تفعيل نظام الصوت');
-            if (typeof enableUserInteraction === 'function') {
-                enableUserInteraction();
-            }
-            // نقوم بإزالة المستمع بعد أول نقرة
-            document.removeEventListener('click', activateSound);
-        }, { once: true });
-        
-        // إضافة زر الصوت إلى واجهة المستخدم بعد 3 ثوان من تحميل الصفحة
-        setTimeout(() => {
-            if (typeof addSoundToggleButton === 'function') {
-                addSoundToggleButton();
-            }
-        }, 3000);
-    }
-    
-    // استدعاء تهيئة نظام الصوت
-    initSoundSystem();
 })();
