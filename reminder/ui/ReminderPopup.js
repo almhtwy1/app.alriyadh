@@ -39,6 +39,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
             reminder.data.forEach((rowData, index) => {
                 let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                 let subject = rowData.length > 1 ? rowData[1] : '';
+                let toEmployee = rowData.length > 2 ? rowData[2] : '';  // إضافة قراءة بيانات الموظف
                 let date = rowData.length > 3 ? rowData[3] : '';
                 tableRows += `
                     <tr>
@@ -48,6 +49,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                         <td>${index + 1}</td>
                         <td>${transactionNumber}</td>
                         <td>${subject}</td>
+                        <td>${toEmployee}</td>  <!-- إضافة عمود الموظف -->
                         <td>${formatDate(date)}</td>
                     </tr>
                 `;
@@ -62,13 +64,14 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
 
                 tableRows += `
                     <tr class="reminder-group-header">
-                        <td colspan="5">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>
+                        <td colspan="6">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>  <!-- تعديل colspan إلى 6 بدلاً من 5 -->
                     </tr>
                 `;
 
                 reminder.data.forEach((rowData, index) => {
                     let transactionNumber = rowData.length > 0 ? rowData[0] : '';
                     let subject = rowData.length > 1 ? rowData[1] : '';
+                    let toEmployee = rowData.length > 2 ? rowData[2] : '';  // إضافة قراءة بيانات الموظف
                     let date = rowData.length > 3 ? rowData[3] : '';
                     tableRows += `
                         <tr>
@@ -78,6 +81,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <td>${index + 1}</td>
                             <td>${transactionNumber}</td>
                             <td>${subject}</td>
+                            <td>${toEmployee}</td>  <!-- إضافة عمود الموظف -->
                             <td>${formatDate(date)}</td>
                         </tr>
                     `;
@@ -100,6 +104,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                                 <th>#</th>
                                 <th>رقم المعاملة</th>
                                 <th>الموضوع</th>
+                                <th>إلى الموظف</th>  <!-- إضافة عنوان العمود الجديد -->
                                 <th>تاريخ الإحالة</th>
                             </tr>
                         </thead>
