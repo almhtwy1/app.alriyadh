@@ -102,10 +102,10 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                             <tr>
                                 <th>حذف</th>
                                 <th>#</th>
-                                <th>رقم المعاملة</th>
+                                <th>المعاملة</th>
                                 <th>الموضوع</th>
-                                <th>إلى الموظف</th>  <!-- عنوان عمود الموظف -->
-                                <th>تاريخ الإحالة</th>
+                                <th>الموظف</th>  <!-- عنوان عمود الموظف -->
+                                <th>تاريخ</th>
                             </tr>
                         </thead>
                         <tbody>
