@@ -203,31 +203,9 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 document.body.removeChild(popupContainer);
             });
         }
-
-        // تشغيل صوت التذكير مع تحسينات التوافق مع المتصفحات
-        try {
-            // تشغيل صوت التذكير مع التحقق من تفاعل المستخدم
-            if (typeof hasUserInteraction !== 'undefined' && typeof enableUserInteraction !== 'undefined') {
-                if (hasUserInteraction) {
-                    playReminderSound(3); // تشغيل الصوت 3 مرات
-                } else {
-                    // إذا لم يكن هناك تفاعل مستخدم، ننتظر قليلاً ثم نحاول مرة أخرى
-                    console.log('جاري انتظار تفاعل المستخدم قبل تشغيل الصوت...');
-                    setTimeout(() => {
-                        if (typeof hasUserInteraction !== 'undefined' && hasUserInteraction) {
-                            playReminderSound(3);
-                        } else {
-                            console.log('لم يتم تسجيل تفاعل مستخدم، لن يتم تشغيل الصوت');
-                        }
-                    }, 2000);
-                }
-            } else {
-                // استخدام الطريقة القديمة إذا لم تكن المتغيرات الجديدة متاحة
-                playReminderSound();
-            }
-        } catch (e) {
-            console.error('خطأ في تشغيل صوت التذكير:', e);
-        }
+        
+        // تم حذف استدعاء التنبيه الصوتي من هنا
+        
     } catch (e) {
         console.error('خطأ في عرض التذكيرات:', e);
     }
