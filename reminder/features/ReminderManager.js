@@ -22,15 +22,17 @@ function setReminder() {
         const cellArray = Array.from(cells);
         let transactionNumber = '';
         let subject = '';
+        let toEmployee = '';  // إضافة متغير للموظف
         let date = '';
         for (let i = 0; i < cellArray.length; i++) {
             const cell = cellArray[i];
             const cellText = cell.getAttribute('title') || cell.textContent.trim();
             if (i === 2) transactionNumber = cellText;
             else if (i === 3) subject = cellText;
+            else if (i === 7) toEmployee = cellText;  // استخراج قيمة "إلى الموظف" من الخلية رقم 7
             else if (i === 10) date = cellText;
         }
-        const rowData = [transactionNumber, subject, '', date];
+        const rowData = [transactionNumber, subject, toEmployee, date];  // إضافة toEmployee إلى البيانات
         allRowsData.push(rowData);
     });
     try {
