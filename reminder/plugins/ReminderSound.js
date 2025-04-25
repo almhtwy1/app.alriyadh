@@ -1,82 +1,47 @@
-// المتغيرات العامة للصوت
-let reminderAudio = null;
-let isSoundEnabled = true;
+// تعديلات على ملف ReminderPopup.js لتحسين استدعاء الصوت
 
-/**
- * تهيئة صوت التذكير
- */
-function initReminderSound() {
-    try {
-        if (!reminderAudio) {
-            reminderAudio = new Audio();
-            // استخدام صوت بسيط من البيانات المضمنة
-            reminderAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAQMAIEBgYGBgYGBgYGBgYGBgYGBgkJCQkJCQkJCQkJCQkJCQkMDAwMDAwMDAwMDAwMDAwMD/////////////////////////////////AAAAAExhdmM1OC4xMwAAAAAAAAAAAAAAACQCkAAAAAAAAAEDIEV/q3cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+MYxAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
-            
-            // تعيين حجم الصوت للمستوى المناسب
-            reminderAudio.volume = 0.7;
-            
-            // تحميل الصوت مسبقاً
-            reminderAudio.load();
-        }
-    } catch (e) {
-        console.error('خطأ في تهيئة صوت التذكير:', e);
-    }
-}
-
-/**
- * تشغيل صوت التذكير
- * @param {number} times - عدد مرات تكرار الصوت (افتراضياً 3)
- */
-function playReminderSound(times = 3) {
-    if (!isSoundEnabled) return;
-    
-    try {
-        // التأكد من تهيئة الصوت
-        if (!reminderAudio) {
-            initReminderSound();
-        }
-        
-        // إعادة ضبط الصوت إذا كان قيد التشغيل
-        reminderAudio.pause();
-        reminderAudio.currentTime = 0;
-        
-        // تشغيل الصوت
-        reminderAudio.play();
-        
-        // تكرار الصوت إذا طلب المستخدم أكثر من مرة
-        let playCount = 1;
-        const audioInterval = setInterval(() => {
-            if (playCount >= times) {
-                clearInterval(audioInterval);
-                return;
+// في نهاية دالة showUnifiedReminderPopup، تعديل استدعاء الصوت كالتالي:
+try {
+    // تشغيل صوت التذكير مع إعطاء الأولوية لتفاعل المستخدم
+    if (hasUserInteraction) {
+        playReminderSound(3); // تشغيل الصوت 3 مرات
+    } else {
+        // إذا لم يكن هناك تفاعل مستخدم، ننتظر قليلاً ثم نحاول مرة أخرى
+        console.log('جاري انتظار تفاعل المستخدم قبل تشغيل الصوت...');
+        setTimeout(() => {
+            if (hasUserInteraction) {
+                playReminderSound(3);
+            } else {
+                console.log('لم يتم تسجيل تفاعل مستخدم، لن يتم تشغيل الصوت');
             }
-            
-            reminderAudio.pause();
-            reminderAudio.currentTime = 0;
-            reminderAudio.play();
-            playCount++;
-        }, 1500);
-    } catch (e) {
-        console.error('خطأ في تشغيل صوت التذكير:', e);
+        }, 2000);
     }
+} catch (e) {
+    console.error('خطأ في تشغيل صوت التذكير:', e);
 }
 
-/**
- * تبديل حالة تفعيل الصوت
- * @returns {boolean} - الحالة الجديدة للصوت
- */
-function toggleReminderSound() {
-    isSoundEnabled = !isSoundEnabled;
-    return isSoundEnabled;
+// تعديلات على ملف main.user.js لتشغيل الصوت عند بدء التطبيق
+
+// إضافة الكود التالي في نهاية الدالة الرئيسية (function() { ... })
+// في الجزء الأخير من السكريبت، قبل الإغلاق })();
+
+// تهيئة وتفعيل الصوت عند بدء التطبيق
+function initSoundSystem() {
+    // محاولة تفعيل الصوت بعد تفاعل المستخدم
+    document.addEventListener('click', function activateSound() {
+        console.log('تم تسجيل نقرة مستخدم، جاري تفعيل نظام الصوت');
+        enableUserInteraction();
+        // نقوم بإزالة المستمع بعد أول نقرة
+        document.removeEventListener('click', activateSound);
+    }, { once: true });
+    
+    // إضافة زر الصوت إلى واجهة المستخدم بعد 3 ثوان من تحميل الصفحة
+    setTimeout(() => {
+        if (typeof addSoundToggleButton === 'function') {
+            addSoundToggleButton();
+        }
+    }, 3000);
 }
 
-/**
- * ضبط حالة تفعيل الصوت
- * @param {boolean} enabled - حالة تفعيل الصوت
- */
-function setReminderSoundEnabled(enabled) {
-    isSoundEnabled = enabled;
-}
-
-// تهيئة الصوت عند تحميل السكريبت
-initReminderSound();
+// استدعاء تهيئة نظام الصوت
+initSoundSystem();
