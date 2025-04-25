@@ -1,104 +1,86 @@
-// ==UserScript==
-// @name         أداة التذكير للمعاملات (متعددة الصفوف)
-// @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  إضافة زر تذكير لحفظ بيانات الصفوف المحددة والتذكير بها بعد وقت يتم تحديده بالدقائق من قبل المستخدم، مع إمكانية تأجيل التذكير بناءً على الرقم المدخل في مربع بجانب زر التأجيل وعدم حذف التذكير إلا عند اتخاذ إجراء من المستخدم. يتيح النقر المزدوج على الصف لفتح المعاملة دون تعطيل، مع إضافة عمود حذف لكل صف في نافذة التذكير يظهر كـ "×" بدون خلفية دائرية.
-// @author       محمد بن مطلق القحطاني
-// @match        http://rasel/CTS/CTSC*
-// @run-at       document-idle
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @grant        GM_deleteValue
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/core/Storage.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/features/ReminderManager.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderButton.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/ui/ReminderPopup.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/observers/MutationHandler.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/plugins/ReminderSound.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DOMUtils.js
-// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/reminder/utils/DateFormatter.js
-// ==/UserScript==
-
-(function() {
-    'use strict';
-
-    // عند الدخول للنافذة
-    const onVisibilityChange = () => {
-        if (document.visibilityState === 'visible') {
-            console.log('التبديل إلى نافذة نشطة - تحديث مكونات التذكير');
-            
-            // التأكد من وجود الزر
-            if (!findButtonById('6787')) {
-                addReminderButton();
-            }
-            
-            // التحقق من التذكيرات وتحديث الشارة
-            checkForReminders();
-            updateReminderBadge();
-            setupRowSelection();
+function setReminder() {
+    const selectedRows = findSelectedRows();
+    if (selectedRows.length === 0) {
+        const reminderList = getActiveRemindersList();
+        if (reminderList.length > 0) {
+            showUnifiedReminderPopup(true, false);
+            return;
+        } else {
+            alert('يرجى تحديد صف واحد أو أكثر من الجدول أولاً');
+            return;
         }
-    };
-    
-    // الاستماع إلى تغييرات حالة النافذة لتوفير الموارد
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    // تهيئة المكونات الأساسية
-    addReminderButton();
-    setupRowSelection();
-    setupObserver();
-    checkForReminders();
-
-    // إضافة الأنماط العامة
-    addGlobalStyles();
-
-    // تحديث شارة التذكير بشكل دوري - وقت أطول لتوفير الأداء
-    const reminderBadgeInterval = setInterval(() => {
-        if (document.visibilityState === 'visible') {
-            updateReminderBadge();
+    }
+    let inputMinutes = prompt("أدخل عدد الدقائق للتذكير:");
+    let minutesDelay = parseInt(inputMinutes, 10);
+    if (isNaN(minutesDelay) || minutesDelay <= 0) {
+        alert("الرجاء إدخال رقم صالح بالدقائق.");
+        return;
+    }
+    const allRowsData = [];
+    selectedRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const cellArray = Array.from(cells);
+        let transactionNumber = '';
+        let subject = '';
+        let toEmployee = '';  // إضافة متغير للموظف
+        let date = '';
+        for (let i = 0; i < cellArray.length; i++) {
+            const cell = cellArray[i];
+            const cellText = cell.getAttribute('title') || cell.textContent.trim();
+            if (i === 2) transactionNumber = cellText;
+            else if (i === 3) subject = cellText;
+            else if (i === 7) toEmployee = cellText;  // استخراج قيمة "إلى الموظف" من الخلية رقم 7
+            else if (i === 10) date = cellText;
         }
-    }, 5000); // زيادة من 3000 إلى 5000 مللي ثانية
-
-    // التحقق من التذكيرات والمكونات بشكل دوري مع تحسين الأداء
-    let lastCheck = Date.now();
-    const componentCheckInterval = setInterval(() => {
-        // التحقق فقط إذا كانت النافذة مرئية ونشطة
-        if (document.visibilityState === 'visible') {
-            const now = Date.now();
-            if (now - lastCheck < 3000) return;
-            lastCheck = now;
-            
-            // فحص فقط إذا كانت هناك حاجة
-            if (!findButtonById('6787')) {
-                addReminderButton();
-            }
-
-            // تحديث الشارة والأنماط
-            updateReminderBadge();
-            addGlobalStyles();
-        }
-    }, 3000); // زيادة من 2000 إلى 3000 مللي ثانية
-    
-    // تنظيف الفواصل الزمنية عند مغادرة الصفحة
-    window.addEventListener('beforeunload', () => {
-        clearInterval(reminderBadgeInterval);
-        clearInterval(componentCheckInterval);
+        const rowData = [transactionNumber, subject, toEmployee, date];  // إضافة toEmployee إلى البيانات
+        allRowsData.push(rowData);
     });
-    
-    // وظيفة للتحقق من وجود تحديثات للمكونات
-    function checkComponentsExistence() {
-        if (!document.getElementById('reminder-global-styles')) {
-            addGlobalStyles();
-        }
-        
-        if (!findButtonById('6787')) {
-            addReminderButton();
-        }
+    try {
+        const reminderCount = incrementReminderCount();
+        const reminderId = REMINDER_PREFIX + reminderCount;
+        const reminderTime = Date.now() + (minutesDelay * 60 * 1000);
+        const reminderData = {
+            id: reminderId,
+            data: allRowsData,
+            createdAt: Date.now(),
+            showAt: reminderTime,
+            delay: minutesDelay
+        };
+        saveReminder(reminderId, reminderData);
+        let reminderList = getActiveRemindersList();
+        reminderList.push({
+            id: reminderId,
+            count: allRowsData.length,
+            showAt: reminderTime
+        });
+        updateReminderList(reminderList);
+        alert(`تم حفظ التذكير لـ ${selectedRows.length} معاملة.\nسيتم التذكير بعد ${minutesDelay} دقائق.`);
+        updateReminderBadge();
+        setTimeout(() => {
+            showUnifiedReminderPopup();
+        }, minutesDelay * 60 * 1000);
+    } catch (e) {
+        console.error('خطأ في حفظ التذكير:', e);
+        alert('حدث خطأ أثناء حفظ التذكير. يرجى المحاولة مرة أخرى.');
     }
-    
-    // التحقق من المكونات بعد تحميل الصفحة
-    if (document.readyState === 'complete') {
-        checkComponentsExistence();
-    } else {
-        window.addEventListener('load', checkComponentsExistence);
+}
+
+function checkForReminders() {
+    try {
+        const now = Date.now();
+        const reminderList = getActiveRemindersList();
+        for (const reminder of reminderList) {
+            if (now >= reminder.showAt) {
+                showUnifiedReminderPopup();
+            } else {
+                const timeRemaining = reminder.showAt - now;
+                setTimeout(() => {
+                    showUnifiedReminderPopup();
+                }, timeRemaining);
+            }
+        }
+        updateReminderBadge();
+    } catch (e) {
+        console.error('خطأ في التحقق من التذكيرات:', e);
     }
-})();
+}
