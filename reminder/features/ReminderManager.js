@@ -1,3 +1,4 @@
+// تعديل دالة setReminder في ملف features/ReminderManager.js
 function setReminder() {
     const selectedRows = findSelectedRows();
     if (selectedRows.length === 0) {
@@ -10,10 +11,10 @@ function setReminder() {
             return;
         }
     }
-    let inputMinutes = prompt("أدخل عدد الدقائق للتذكير:");
-    let minutesDelay = parseInt(inputMinutes, 10);
-    if (isNaN(minutesDelay) || minutesDelay <= 0) {
-        alert("الرجاء إدخال رقم صالح بالدقائق.");
+    let inputDays = prompt("أدخل عدد الأيام للتذكير:");
+    let daysDelay = parseInt(inputDays, 10);
+    if (isNaN(daysDelay) || daysDelay <= 0) {
+        alert("الرجاء إدخال رقم صالح بالأيام.");
         return;
     }
     const allRowsData = [];
@@ -22,29 +23,30 @@ function setReminder() {
         const cellArray = Array.from(cells);
         let transactionNumber = '';
         let subject = '';
-        let toEmployee = '';  // إضافة متغير للموظف
+        let toEmployee = '';
         let date = '';
         for (let i = 0; i < cellArray.length; i++) {
             const cell = cellArray[i];
             const cellText = cell.getAttribute('title') || cell.textContent.trim();
             if (i === 2) transactionNumber = cellText;
             else if (i === 3) subject = cellText;
-            else if (i === 7) toEmployee = cellText;  // استخراج قيمة "إلى الموظف" من الخلية رقم 7
+            else if (i === 7) toEmployee = cellText;
             else if (i === 10) date = cellText;
         }
-        const rowData = [transactionNumber, subject, toEmployee, date];  // إضافة toEmployee إلى البيانات
+        const rowData = [transactionNumber, subject, toEmployee, date];
         allRowsData.push(rowData);
     });
     try {
         const reminderCount = incrementReminderCount();
         const reminderId = REMINDER_PREFIX + reminderCount;
-        const reminderTime = Date.now() + (minutesDelay * 60 * 1000);
+        // تحويل الأيام إلى مللي ثانية (24 ساعة × 60 دقيقة × 60 ثانية × 1000 مللي ثانية)
+        const reminderTime = Date.now() + (daysDelay * 24 * 60 * 60 * 1000);
         const reminderData = {
             id: reminderId,
             data: allRowsData,
             createdAt: Date.now(),
             showAt: reminderTime,
-            delay: minutesDelay
+            delay: daysDelay
         };
         saveReminder(reminderId, reminderData);
         let reminderList = getActiveRemindersList();
@@ -54,11 +56,11 @@ function setReminder() {
             showAt: reminderTime
         });
         updateReminderList(reminderList);
-        alert(`تم حفظ التذكير لـ ${selectedRows.length} معاملة.\nسيتم التذكير بعد ${minutesDelay} دقائق.`);
+        alert(`تم حفظ التذكير لـ ${selectedRows.length} معاملة.\nسيتم التذكير بعد ${daysDelay} يوم.`);
         updateReminderBadge();
         setTimeout(() => {
             showUnifiedReminderPopup();
-        }, minutesDelay * 60 * 1000);
+        }, daysDelay * 24 * 60 * 60 * 1000);
     } catch (e) {
         console.error('خطأ في حفظ التذكير:', e);
         alert('حدث خطأ أثناء حفظ التذكير. يرجى المحاولة مرة أخرى.');
