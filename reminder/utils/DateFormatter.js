@@ -95,6 +95,7 @@ function formatDateForDisplay(dateStr) {
 
 /**
  * حساب المدة الزمنية المنقضية منذ تاريخ معين
+ * تم تعديل الدالة للتعامل مع الأيام بدلاً من الدقائق
  * @param {number} timestamp - الطابع الزمني بالمللي ثانية
  * @returns {string} - المدة المنقضية كنص
  */
@@ -103,19 +104,22 @@ function getElapsedTime(timestamp) {
         const now = Date.now();
         const diff = now - timestamp;
         
-        // تحويل المدة إلى دقائق
-        const minutes = Math.floor(diff / (60 * 1000));
+        // تحويل المدة إلى أيام
+        const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+        const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
         
-        if (minutes < 60) {
-            return `منذ ${minutes} دقيقة`;
-        } else if (minutes < 24 * 60) {
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            return `منذ ${hours} ساعة و ${remainingMinutes} دقيقة`;
+        if (days === 0) {
+            if (hours === 0) {
+                const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+                return `منذ ${minutes} دقيقة`;
+            }
+            return `منذ ${hours} ساعة`;
+        } else if (days < 30) {
+            return `منذ ${days} يوم و ${hours} ساعة`;
         } else {
-            const days = Math.floor(minutes / (24 * 60));
-            const remainingHours = Math.floor((minutes % (24 * 60)) / 60);
-            return `منذ ${days} يوم و ${remainingHours} ساعة`;
+            const months = Math.floor(days / 30);
+            const remainingDays = days % 30;
+            return `منذ ${months} شهر و ${remainingDays} يوم`;
         }
     } catch (e) {
         console.error('خطأ في حساب المدة الزمنية:', e);
