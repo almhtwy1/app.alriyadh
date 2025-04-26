@@ -29,12 +29,14 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
             const reminderItem = remindersToShow[0];
             const reminder = getReminder(reminderItem.id);
             if (!reminder) return;
-            const timePassed = Math.floor((now - reminder.createdAt) / (60 * 1000));
+            // تحويل الوقت المنقضي من مللي ثانية إلى أيام
+            const daysPassed = Math.floor((now - reminder.createdAt) / (24 * 60 * 60 * 1000));
+            const hoursPassed = Math.floor(((now - reminder.createdAt) % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
 
             if (!reminder.data || reminder.data.length === 0) return;
 
             headerText = 'تذكير بالمعاملات';
-            subtitleText = `تم إنشاء هذا التذكير منذ ${timePassed} دقيقة - عدد المعاملات: ${reminder.data.length}`;
+            subtitleText = `تم إنشاء هذا التذكير منذ ${daysPassed} يوم و ${hoursPassed} ساعة - عدد المعاملات: ${reminder.data.length}`;
 
             reminder.data.forEach((rowData, index) => {
                 let transactionNumber = rowData.length > 0 ? rowData[0] : '';
@@ -58,13 +60,15 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
             remindersToShow.forEach((reminderItem, reminderIndex) => {
                 const reminder = getReminder(reminderItem.id);
                 if (!reminder) return;
-                const timePassed = Math.floor((now - reminder.createdAt) / (60 * 1000));
+                // تحويل الوقت المنقضي من مللي ثانية إلى أيام
+                const daysPassed = Math.floor((now - reminder.createdAt) / (24 * 60 * 60 * 1000));
+                const hoursPassed = Math.floor(((now - reminder.createdAt) % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
 
                 if (!reminder.data || reminder.data.length === 0) return;
 
                 tableRows += `
                     <tr class="reminder-group-header">
-                        <td colspan="6">تذكير ${reminderIndex + 1} (منذ ${timePassed} دقيقة)</td>  <!-- تعديل colspan إلى 6 -->
+                        <td colspan="6">تذكير ${reminderIndex + 1} (منذ ${daysPassed} يوم و ${hoursPassed} ساعة)</td>  <!-- تعديل colspan إلى 6 -->
                     </tr>
                 `;
 
@@ -114,7 +118,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                     </table>
                 </div>
                 <div class="popup-footer" style="${showButtons ? '' : 'display: none;'}">
-                    <input type="number" min="1" placeholder="دقائق" class="postponeInput" style="width: 60px; margin-right: 10px;" />
+                    <input type="number" min="1" placeholder="أيام" class="postponeInput" style="width: 60px; margin-right: 10px;" />
                     <button class="postponeBtn">تأجيل الكل</button>
                     <button class="closeAllBtn">إغلاق الكل</button>
                 </div>
@@ -171,14 +175,15 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 const postponeInput = popupContainer.querySelector('.postponeInput').value;
                 let newDelay = parseInt(postponeInput, 10);
                 if (isNaN(newDelay) || newDelay <= 0) {
-                    alert("الرجاء إدخال رقم صحيح للدقائق في مربع التأجيل.");
+                    alert("الرجاء إدخال رقم صحيح للأيام في مربع التأجيل.");
                     return;
                 }
                 remindersToShow.forEach(reminderItem => {
                     const reminder = getReminder(reminderItem.id);
                     if (!reminder) return;
                     reminder.createdAt = Date.now();
-                    reminder.showAt = Date.now() + (newDelay * 60 * 1000);
+                    // تحويل الأيام إلى مللي ثانية
+                    reminder.showAt = Date.now() + (newDelay * 24 * 60 * 60 * 1000);
                     saveReminder(reminderItem.id, reminder);
                     let reminderList = getActiveRemindersList().map(r =>
                         r.id === reminderItem.id
@@ -188,7 +193,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                     updateReminderList(reminderList);
                     setTimeout(() => {
                         showUnifiedReminderPopup();
-                    }, newDelay * 60 * 1000);
+                    }, newDelay * 24 * 60 * 60 * 1000);
                 });
                 alert("تم تأجيل جميع التذكيرات.");
                 document.body.removeChild(popupContainer);
