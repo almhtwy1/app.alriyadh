@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         تسجيل الحضور واختصار Alt+3 المدمج
+// @name         تسجيل الحضور واختصار Alt+3 المدمج والمحسن
 // @namespace    http://tampermonkey.net/
-// @version      4.0
-// @description  تسجيل حضور بضغطة زر أو اختصار Alt+3، مع تعبئة البيانات والتنقل التلقائي حسب الشروط.
+// @version      5.0
+// @description  تسجيل حضور بضغطة زر أو اختصار Alt+3، مع تعبئة البيانات والتنقل التلقائي حسب الشروط واختيار أول عنصر في الجدول.
 // @author       محمد بن مطلق القحطاني
 // @match        https://crm.alriyadh.gov.sa/*
 // @grant        none
@@ -117,10 +117,22 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // اختصار Alt+3
+    // تحسين اختصار Alt+3 ليشمل اختيار أول عنصر في الجدول
     document.addEventListener('keydown', function (event) {
         if ((event.altKey || event.altRight) && event.key === '3') {
             event.preventDefault();
+            
+            // التحقق من وجود جدول العناصر التي أعمل عليها وتحديد أول عنصر إن وجد
+            let workingOnItemsElement = document.querySelector('h1[data-id^="ViewSelector_"][aria-label="العناصر التي أعمل عليها"]');
+            if (workingOnItemsElement) {
+                let firstTableItem = document.querySelector('a[title^="DMV-"]');
+                if (firstTableItem) {
+                    firstTableItem.click();
+                    return;
+                }
+            }
+            
+            // إذا لم يكن هناك جدول، تابع بالوظائف السابقة
             let attendButton = document.querySelector('button[aria-label="تسجيل الحضور"]');
             let caseReason = document.querySelector('div[aria-label="قيد مراجعة المسؤول"]');
 
@@ -131,7 +143,7 @@
                 if (queueItem) {
                     queueItem.click();
                 } else {
-                    console.error('لم يتم العثور على زر الحضور ولا قائمة الانتظار');
+                    console.error('لم يتم العثور على زر الحضور ولا قائمة الانتظار ولا عناصر في الجدول');
                 }
             }
         }
