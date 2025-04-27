@@ -117,7 +117,7 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // تحسين اختصار Alt+3 ليشمل اختيار أول عنصر في الجدول
+    // اختصار Alt+3
     document.addEventListener('keydown', function (event) {
         if ((event.altKey || event.altRight) && event.key === '3') {
             event.preventDefault();
@@ -134,6 +134,7 @@
             
             // إذا لم يكن هناك جدول، تابع بالوظائف السابقة
             let attendButton = document.querySelector('button[aria-label="تسجيل الحضور"]');
+            let customAttendButton = document.getElementById('custom-attend-button');
             let caseReason = document.querySelector('div[aria-label="قيد مراجعة المسؤول"]');
 
             if (attendButton && caseReason) {
@@ -149,5 +150,6 @@
         }
     });
 
+    // إضافة زر تسجيل الحضور بفاصل زمني
     setInterval(addButton, 500);
 })();
