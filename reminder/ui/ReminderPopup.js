@@ -1,8 +1,41 @@
 let highestZIndex = 9999;
+let popupOverlay = null;
 
 function bringToFront(popupElement) {
     highestZIndex++;
     popupElement.style.zIndex = highestZIndex;
+    
+    // Si hay un overlay, también actualizamos su z-index
+    if (popupOverlay) {
+        popupOverlay.style.zIndex = highestZIndex - 1;
+    }
+}
+
+function createOverlay() {
+    if (popupOverlay) {
+        document.body.removeChild(popupOverlay);
+    }
+    
+    popupOverlay = document.createElement('div');
+    popupOverlay.id = 'reminderPopupOverlay';
+    popupOverlay.style.position = 'fixed';
+    popupOverlay.style.top = '0';
+    popupOverlay.style.left = '0';
+    popupOverlay.style.width = '100%';
+    popupOverlay.style.height = '100%';
+    popupOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    popupOverlay.style.zIndex = highestZIndex;
+    popupOverlay.style.backdropFilter = 'blur(3px)';
+    
+    document.body.appendChild(popupOverlay);
+    return popupOverlay;
+}
+
+function removeOverlay() {
+    if (popupOverlay && popupOverlay.parentNode) {
+        document.body.removeChild(popupOverlay);
+        popupOverlay = null;
+    }
 }
 
 function showUnifiedReminderPopup(showAll = false, showButtons = true) {
@@ -11,6 +44,10 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
         const now = Date.now();
         let remindersToShow = showAll ? reminderList : reminderList.filter(r => now >= r.showAt);
         if (remindersToShow.length === 0) return;
+
+        // Crear overlay antes de mostrar la ventana emergente
+        createOverlay();
+        highestZIndex++;
 
         let popupContainer = document.getElementById('unifiedReminderPopup');
         if (popupContainer) {
@@ -130,6 +167,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
         popupContainer.style.top = '50%';
         popupContainer.style.left = '50%';
         popupContainer.style.transform = 'translate(-50%, -50%)';
+        popupContainer.style.zIndex = highestZIndex;
 
         popupContainer.addEventListener('mousedown', function(e) {
             bringToFront(popupContainer);
@@ -137,6 +175,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
 
         popupContainer.querySelector('.close-popup-btn').addEventListener('click', () => {
             document.body.removeChild(popupContainer);
+            removeOverlay();
         });
 
         popupContainer.querySelectorAll('.delete-row').forEach(btn => {
@@ -162,6 +201,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 }
                 updateReminderBadge();
                 document.body.removeChild(popupContainer);
+                removeOverlay();
                 if (showAll && reminderList.length > 0) {
                     showUnifiedReminderPopup(true, false);
                 } else {
@@ -197,6 +237,7 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 });
                 alert("تم تأجيل جميع التذكيرات.");
                 document.body.removeChild(popupContainer);
+                removeOverlay();
             });
 
             popupContainer.querySelector('.closeAllBtn').addEventListener('click', () => {
@@ -206,13 +247,23 @@ function showUnifiedReminderPopup(showAll = false, showButtons = true) {
                 updateReminderList([]);
                 updateReminderBadge();
                 document.body.removeChild(popupContainer);
+                removeOverlay();
             });
         }
         
-        // تم حذف استدعاء التنبيه الصوتي من هنا
+        // Añadir evento de clic en el overlay para cerrar la ventana
+        popupOverlay.addEventListener('click', function(e) {
+            // Solo cerrar si se hace clic directamente en el overlay (no en sus hijos)
+            if (e.target === popupOverlay) {
+                document.body.removeChild(popupContainer);
+                removeOverlay();
+            }
+        });
         
     } catch (e) {
         console.error('خطأ في عرض التذكيرات:', e);
+        // Asegurar que se elimine el overlay en caso de error
+        removeOverlay();
     }
 }
 
