@@ -24,6 +24,83 @@ const Analyzer = (() => {
     }
     
     /**
+     * دالة للعثور على فترة الإجازة
+     * @param {string} note - نص الملاحظة
+     * @returns {Object|null} كائن يحتوي على تاريخ البداية والنهاية أو null
+     */
+    function extractLeavePeriod(note) {
+        // البحث عن تاريخ البداية والنهاية في النمط "مـــن xx-xx-xxxx الي xx-xx-xxxx"
+        const periodRegex = /مـــن\s+(\d+[-\/]\d+[-\/]\d+)\s+الي\s+(\d+[-\/]\d+[-\/]\d+)/;
+        const periodMatch = note.match(periodRegex);
+        
+        // أو في النمط "من xx-xx-xxxx الى xx-xx-xxxx"
+        const altPeriodRegex = /من\s+(\d+[-\/]\d+[-\/]\d+)\s+الى\s+(\d+[-\/]\d+[-\/]\d+)/;
+        const altPeriodMatch = note.match(altPeriodRegex);
+        
+        const match = periodMatch || altPeriodMatch;
+        
+        if (match) {
+            return {
+                startDate: match[1],
+                endDate: match[2],
+            };
+        }
+        
+        return null;
+    }
+    
+    /**
+     * دالة لحساب عدد الأيام في فترة الإجازة
+     * @param {string} periodKey - مفتاح الفترة بتنسيق "startDate_endDate"
+     * @returns {number} عدد الأيام في الفترة
+     */
+    function calculateLeaveDuration(periodKey) {
+        if (!periodKey) return 1; // إذا لم يتم العثور على فترة، افترض يوم واحد
+        
+        // تقسيم المفتاح للحصول على تاريخي البداية والنهاية
+        const [startDate, endDate] = periodKey.split('_');
+        
+        // تحويل التاريخ من التنسيق "xx-xx-xxxx" إلى مكونات
+        const [startDay, startMonth, startYear] = startDate.split('-').map(Number);
+        const [endDay, endMonth, endYear] = endDate.split('-').map(Number);
+        
+        // حساب الفرق بالأيام (تقريبي، لا يأخذ في الاعتبار الشهور المختلفة بدقة)
+        // لحساب دقيق نحتاج تحويل التاريخ الهجري إلى ميلادي وهو أمر معقد
+        // هذا التقدير البسيط يعمل بشكل جيد للفترات القصيرة
+        
+        if (startYear !== endYear) {
+            // تقدير تقريبي لعدد الأيام عبر سنوات مختلفة
+            const daysInYear = 355; // تقريب لعدد أيام السنة الهجرية
+            return (endYear - startYear) * daysInYear + (endDay - startDay + 1) + 
+                   (endMonth - startMonth) * 30; // تقريب متوسط أيام الشهر الهجري
+        } else if (startMonth !== endMonth) {
+            // تقدير عدد الأيام عبر شهور مختلفة
+            return (endMonth - startMonth) * 30 + (endDay - startDay + 1); // تقريب متوسط أيام الشهر الهجري
+        } else {
+            // نفس الشهر والسنة
+            return endDay - startDay + 1;
+        }
+    }
+    
+    /**
+     * دالة لتحديد ما إذا كانت الإجازة مفردة (أقل من 5 أيام)
+     * @param {string} periodKey - مفتاح الفترة
+     * @param {string} leaveType - نوع الإجازة
+     * @returns {boolean} هل الإجازة مفردة
+     */
+    function isSingleLeave(periodKey, leaveType) {
+        // لا نعتبر الإجازات الأسبوعية أو المهام والاستئذانات كإجازات مفردة
+        if (leaveType.includes("الاجازة الاسبوعية") || 
+            leaveType.includes("مهمة") || 
+            leaveType.includes("استئذان")) {
+            return false;
+        }
+        
+        const duration = calculateLeaveDuration(periodKey);
+        return duration < 5; // أقل من 5 أيام
+    }
+    
+    /**
      * تحليل بيانات الحضور والإجازات
      */
     function analyzeAttendance() {
@@ -36,11 +113,13 @@ const Analyzer = (() => {
 
         // تهيئة متغيرات لحساب أنواع الإجازات
         const leaveTypesSummary = {}; // ملخص الإجازات المجمعة
+        const leavePeriodsMap = new Map(); // تخزين فترات الإجازة لتحديد مدتها
 
         let totalWorkDays = 0;
         let totalLeaveDays = 0;
         let regularLeaveDays = 0; // عدد أيام الإجازات الاعتيادية
         let missionsAndPermissionsDays = 0; // عدد أيام المهام والاستئذان
+        let singleLeaveDays = 0; // عدد أيام الإجازات المفردة (أقل من 5 أيام)
         let presentDays = 0;
         let absentDays = 0;
 
@@ -72,20 +151,45 @@ const Analyzer = (() => {
             if (note) {
                 // استخراج النوع الرئيسي للإجازة
                 const mainLeaveType = extractMainLeaveType(note);
-
+                
+                // استخراج فترة الإجازة إن وجدت
+                const leavePeriod = extractLeavePeriod(note);
+                let periodKey = null;
+                
+                if (leavePeriod) {
+                    periodKey = `${leavePeriod.startDate}_${leavePeriod.endDate}`;
+                    // تخزين فترة الإجازة ونوعها إذا لم تكن مخزنة من قبل
+                    if (!leavePeriodsMap.has(periodKey)) {
+                        leavePeriodsMap.set(periodKey, {
+                            type: mainLeaveType,
+                            duration: calculateLeaveDuration(periodKey),
+                            counted: false
+                        });
+                    }
+                }
+                
                 // إضافة الإجازة إلى إحصائيات أنواع الإجازات المجمعة (بما في ذلك الإجازة الأسبوعية)
                 if (!leaveTypesSummary[mainLeaveType]) {
                     leaveTypesSummary[mainLeaveType] = 0;
                 }
                 leaveTypesSummary[mainLeaveType]++;
-
+                
                 // استبعاد الإجازات الأسبوعية من الإحصائيات العامة
                 if (!mainLeaveType.includes("الاجازة الاسبوعية")) {
                     // حساب إجازات الاعتيادية
                     if (mainLeaveType.includes("إجـازة إعتيادية")) {
                         regularLeaveDays++;
+                        
+                        // التحقق من الإجازات المفردة (أقل من 5 أيام) وحسابها فقط مرة واحدة لكل فترة
+                        if (leavePeriod && isSingleLeave(periodKey, mainLeaveType)) {
+                            const periodInfo = leavePeriodsMap.get(periodKey);
+                            if (!periodInfo.counted) {
+                                singleLeaveDays += periodInfo.duration;
+                                periodInfo.counted = true;
+                            }
+                        }
                     }
-
+                    
                     // حساب أيام المهام والاستئذان
                     if (mainLeaveType.includes("مهمة") || mainLeaveType.includes("استئذان")) {
                         missionsAndPermissionsDays++;
@@ -152,6 +256,7 @@ const Analyzer = (() => {
             totalLeaveDays,
             regularLeaveDays,
             missionsAndPermissionsDays,
+            singleLeaveDays,
             absentDays,
             leaveTypesSummary,
             averageArrivalTime,
