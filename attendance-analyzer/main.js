@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  إضافة زر لتحليل الحضور والإجازات مع إحصائيات مفصلة
-// @author       almhtwy1
+// @author       محمد مطلق القحطاني
 // @match        https://intranetapps/Attendance/Search*
 // @grant        none
 // @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/attendance-analyzer/ui.js
