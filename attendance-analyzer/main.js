@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         تحليل الحضور والإجازات
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  إضافة زر لتحليل الحضور والإجازات مع إحصائيات مفصلة
 // @author       محمد مطلق القحطاني
 // @match        https://intranetapps/Attendance/Search*
