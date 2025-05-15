@@ -119,8 +119,8 @@ const Renderer = (() => {
 
         const generalStatsItems = [
             {label: 'أيام الحضور', value: data.presentDays},
-            {label: 'إجمالي أيام الإجازات', value: data.totalLeaveDays},
             {label: 'أيام الإجازات الاعتيادية', value: data.regularLeaveDays},
+            {label: 'أيام الإجازات المفردة (أقل من 5 أيام)', value: data.singleLeaveDays},
             {label: 'أيام المهام والاستئذان', value: data.missionsAndPermissionsDays},
             {label: 'أيام الغياب', value: data.absentDays}
         ];
