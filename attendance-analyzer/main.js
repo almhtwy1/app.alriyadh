@@ -6,10 +6,10 @@
 // @author       almhtwy1
 // @match        https://intranetapps/Attendance/Search*
 // @grant        none
-// @require      https://raw.githubusercontent.com/almhtwy1/attendance-analyzer/main/ui.js
-// @require      https://raw.githubusercontent.com/almhtwy1/attendance-analyzer/main/analyzer.js
-// @require      https://raw.githubusercontent.com/almhtwy1/attendance-analyzer/main/helpers.js
-// @require      https://raw.githubusercontent.com/almhtwy1/attendance-analyzer/main/renderer.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/attendance-analyzer/ui.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/attendance-analyzer/analyzer.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/attendance-analyzer/helpers.js
+// @require      https://raw.githubusercontent.com/almhtwy1/app.alriyadh/main/attendance-analyzer/renderer.js
 // ==/UserScript==
 
 (function() {
